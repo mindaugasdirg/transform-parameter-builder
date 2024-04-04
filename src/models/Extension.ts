@@ -1,3 +1,6 @@
+export const EXTENSION_NAMES = {
+  emphasizedElements: "EmphasizeElements",
+} as const;
 
 export interface Extension {
   extensionName: string;
