@@ -27,6 +27,7 @@ export function parseLegacySavedView(legacyViewDefinition: LegacyView, viewMode:
     models: getListFromListOrCompressedId64Set(legacyViewDefinition.modelSelectorProps?.models),
     neverDrawn: legacyViewDefinition.emphasizeElementsProps?.neverDrawn,
     alwaysDrawn: legacyViewDefinition.emphasizeElementsProps?.alwaysDrawn,
+    isAlwaysDrawnExclusive: legacyViewDefinition.emphasizeElementsProps?.isAlwaysDrawnExclusive,
     subCategoryOvr: legacyViewDefinition.displayStyleProps.jsonProperties?.styles?.subCategoryOvr as SubCategoryOverrideData[],
     clip: tryGetClipDataForLegacyView(legacyViewDefinition.viewDefinitionProps.jsonProperties?.viewDetails?.clip),
     perModelCategoryVisibility: legacyViewDefinition.perModelCategoryVisibility,
