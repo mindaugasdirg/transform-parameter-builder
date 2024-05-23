@@ -5,13 +5,17 @@ import { CompressedId64Set, Id64Array } from "@itwin/core-bentley";
 import { SubCategoryOverrideData } from "./models/ITwin3dView";
 import { SavedView } from "./models/SavedView";
 import { NewClipPrimitivePlaneProps, NewClipPrimitiveShapeProps } from "./models/ClipVectors";
+import { EmphasizeElements } from "./models/EmphasizeElements";
+import { EXTENSION_NAMES } from "./models/Extension";
 
 export function parseSavedView(savedView: SavedView, viewMode: ViewModes): TransformParameters {
-  // TODO: add a way to handle alwaysDrawn parameter
+  // TODO: Check if perModelCategoryVisibility is mapped correctly
   return {
     categories: getListFromListOrCompressedId64Set(savedView.savedViewData.itwin3dView.categories?.enabled),
     models: getListFromListOrCompressedId64Set(savedView.savedViewData.itwin3dView.models?.enabled),
-    neverDrawn: getExtensionValue<Id64Array>(savedView.extensions, "emphasizeElementsProps"),
+    neverDrawn: getNeverDrawnSavedView(savedView),
+    alwaysDrawn: getAlwaysDrawnSavedView(savedView),
+    isAlwaysDrawnExclusive: getIsAlwaysDrawnExclusive(savedView),
     subCategoryOvr: savedView.savedViewData.itwin3dView.displayStyle?.subCategoryOverrides,
     clip: tryGetClipData(savedView.savedViewData.itwin3dView.clipVectors),
     perModelCategoryVisibility: getExtensionValue<PerModelCategoryData[]>(savedView.extensions, "perModelCategoryVisibilityProps") ?? [],
@@ -27,6 +31,7 @@ export function parseLegacySavedView(legacyViewDefinition: LegacyView, viewMode:
     models: getListFromListOrCompressedId64Set(legacyViewDefinition.modelSelectorProps?.models),
     neverDrawn: legacyViewDefinition.emphasizeElementsProps?.neverDrawn,
     alwaysDrawn: legacyViewDefinition.emphasizeElementsProps?.alwaysDrawn,
+    isAlwaysDrawnExclusive: legacyViewDefinition.emphasizeElementsProps?.isAlwaysDrawnExclusive,
     subCategoryOvr: legacyViewDefinition.displayStyleProps.jsonProperties?.styles?.subCategoryOvr as SubCategoryOverrideData[],
     clip: tryGetClipDataForLegacyView(legacyViewDefinition.viewDefinitionProps.jsonProperties?.viewDetails?.clip),
     perModelCategoryVisibility: legacyViewDefinition.perModelCategoryVisibility,
@@ -52,6 +57,18 @@ function getExtensionValue<R>(extensions: { extensionName: string, data: string 
   const data = extensions.find((x: { extensionName: string }) => x.extensionName === extensionName)?.data;
 
   return data ? JSON.parse(data) : undefined;
+}
+
+function getAlwaysDrawnSavedView(savedView: SavedView): Id64Array | undefined {
+  return getExtensionValue<EmphasizeElements>(savedView.extensions, EXTENSION_NAMES.emphasizedElements)?.emphasizeElementsProps?.alwaysDrawn;
+}
+
+function getIsAlwaysDrawnExclusive(savedView: SavedView): boolean | undefined {
+  return getExtensionValue<EmphasizeElements>(savedView.extensions, EXTENSION_NAMES.emphasizedElements)?.emphasizeElementsProps?.isAlwaysDrawnExclusive;
+}
+
+function getNeverDrawnSavedView(savedView: SavedView): Id64Array | undefined {
+  return getExtensionValue<EmphasizeElements>(savedView.extensions, EXTENSION_NAMES.emphasizedElements)?.emphasizeElementsProps?.neverDrawn;
 }
 
 export function parseTransformParametersToJson(transformParameters: TransformParameters, includeEscapeCharacters?: boolean): string {
