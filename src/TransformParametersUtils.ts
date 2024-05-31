@@ -1,10 +1,16 @@
 import { ClipPrimitivePlanesProps, ClipPrimitiveShapeProps, ClipVectorProps } from "@itwin/core-geometry";
-import { ClipData, LegacyView, PerModelCategoryData, PlaneProps, ShapeProps } from "./models/LegacyView";
+import { ClipData, LegacyView, PerModelCategoryData, PlaneClip, PlaneClipSet, PlaneProps, ShapeProps, UnionOfPlaneClipSets } from "./models/LegacyView";
 import { TransformParameters, ViewModes } from "./models/FilterByViewDefinition";
 import { CompressedId64Set, Id64Array } from "@itwin/core-bentley";
 import { SubCategoryOverrideData } from "./models/ITwin3dView";
 import { SavedView } from "./models/SavedView";
-import { NewClipPrimitivePlaneProps, NewClipPrimitiveShapeProps } from "./models/ClipVectors";
+import {
+  ClipPlaneProps as NewClipPlaneProps,
+  NewClipPrimitivePlaneProps,
+  NewClipPrimitiveShapeProps,
+  PlanesProps as NewPlaneProps,
+  ShapeProps as NewShapeProps,
+} from "./models/ClipVectors";
 import { EmphasizeElements } from "./models/EmphasizeElements";
 import { EXTENSION_NAMES } from "./models/Extension";
 
@@ -98,22 +104,23 @@ function tryGetClipDataForLegacyView(clipVectors: ClipVectorProps | undefined): 
 }
 
 function tryGetClipData(_clipVectors: Array<NewClipPrimitivePlaneProps | NewClipPrimitiveShapeProps> | undefined): ClipData | undefined {
-  // TODO: fix
-  // if (!clipVectors || !clipVectors.length)
-  //   return undefined;
+  if (!_clipVectors || !_clipVectors.length)
+    return undefined;
 
-  // const clipPlanes = clipVectors
-  //   .map((primitive) => isNewPlanePrimitive(primitive) && changeDistanceToDistForClips(primitive.planes))
-  //   .filter((primitive) => isNewPlanePrimitive(primitive));
+  const clipPlanes: PlaneProps[] = _clipVectors
+    .filter((primitive) => isPlanePrimitive(primitive))
+    .map((primitive) => (primitive as NewClipPrimitivePlaneProps).planes )
+    .map((primitive) => changeNewPlanePropsToPlaneProps(primitive));
 
-  // const clipShapes = clipVectors
-  //   .filter((primitive) => isNewShapePrimitive(primitive))
-  //   .map((primitive) => (primitive as NewClipPrimitiveShapeProps).shape as unknown as ShapeProps);
+  const clipShapes: ShapeProps[] = _clipVectors
+    .filter((primitive) => isShapePrimitive(primitive))
+    .map((primitive) => (primitive as NewClipPrimitiveShapeProps).shape )
+    .map((primitive) => changeNewShapePropsToShapeProps(primitive));
 
-  // return {
-  //   shapes: clipShapes.length > 0 ? clipShapes : undefined,
-  //   planes: clipPlanes.length > 0 ? clipPlanes : undefined,
-  // };
+  return {
+    shapes: clipShapes.length > 0 ? clipShapes : [],
+    planes: clipPlanes.length > 0 ? clipPlanes : [],
+  };
   return;
 }
 
@@ -123,4 +130,39 @@ function isPlanePrimitive(primitive: any): primitive is ClipPrimitivePlanesProps
 
 function isShapePrimitive(primitive: any): primitive is ClipPrimitiveShapeProps {
   return "shape" in primitive;
+}
+
+function changeNewShapePropsToShapeProps(primitive: NewShapeProps): ShapeProps {
+  return {
+    points: primitive.points,
+    trans: primitive.transform,
+    zlow: primitive.zLow,
+    zhigh: primitive.zHigh,
+    mask: primitive.mask,
+    invisible: primitive.invisible,
+  };
+}
+
+function changeNewPlanePropsToPlaneProps(primitive: NewPlaneProps): PlaneProps {
+  return {
+    clips: getClipPlaneProps(primitive.clips),
+    invisible: primitive.invisible,
+  };
+}
+
+function getClipPlaneProps(clips: NewClipPlaneProps[][]): UnionOfPlaneClipSets {
+  const planeClipSet: PlaneClipSet[] = [];
+  clips.forEach((element) => {
+    const planeClip: PlaneClip[] = [];
+    element.forEach((clip) => {
+      planeClip.push({
+        normal: clip.normal,
+        dist: clip.distance,
+        invisible: clip.invisible,
+        interior: clip.interior,
+      });
+    });
+    planeClipSet.push(planeClip);
+  });
+  return planeClipSet;
 }

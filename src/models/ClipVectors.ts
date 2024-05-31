@@ -16,7 +16,7 @@ export interface PlanesProps {
    * Contains the shape/polygon used to clip the view
    */
 export interface ShapeProps {
-  points: number[][];
+  points: [px: number, py: number, pz: number][];
   transform: [
     [qx: number, qy: number, qz: number, ax: number],
     [qx: number, qy: number, qz: number, ax: number],
