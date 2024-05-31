@@ -121,7 +121,6 @@ function tryGetClipData(_clipVectors: Array<NewClipPrimitivePlaneProps | NewClip
     shapes: clipShapes.length > 0 ? clipShapes : [],
     planes: clipPlanes.length > 0 ? clipPlanes : [],
   };
-  return;
 }
 
 function isPlanePrimitive(primitive: any): primitive is ClipPrimitivePlanesProps {
