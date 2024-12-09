@@ -1,5 +1,5 @@
 import { ClipPrimitivePlanesProps, ClipPrimitiveShapeProps, ClipVectorProps } from "@itwin/core-geometry";
-import { ClipData, LegacyView, PerModelCategoryData, PlaneClip, PlaneClipSet, PlaneProps, ShapeProps, UnionOfPlaneClipSets } from "./models/LegacyView";
+import { ClipData, LegacyView, PerModelCategoryExtension, PlaneClip, PlaneClipSet, PlaneProps, ShapeProps, UnionOfPlaneClipSets } from "./models/LegacyView";
 import { TransformParameters, ViewModes } from "./models/FilterByViewDefinition";
 import { CompressedId64Set, Id64Array } from "@itwin/core-bentley";
 import { SubCategoryOverrideData } from "./models/ITwin3dView";
@@ -15,7 +15,6 @@ import { EmphasizeElements } from "./models/EmphasizeElements";
 import { EXTENSION_NAMES } from "./models/Extension";
 
 export function parseSavedView(savedView: SavedView, viewMode: ViewModes): TransformParameters {
-  // TODO: Check if perModelCategoryVisibility is mapped correctly
   return {
     categories: getListFromListOrCompressedId64Set(savedView.savedViewData.itwin3dView.categories?.enabled),
     models: getListFromListOrCompressedId64Set(savedView.savedViewData.itwin3dView.models?.enabled),
@@ -24,7 +23,7 @@ export function parseSavedView(savedView: SavedView, viewMode: ViewModes): Trans
     isAlwaysDrawnExclusive: getIsAlwaysDrawnExclusive(savedView),
     subCategoryOvr: savedView.savedViewData.itwin3dView.displayStyle?.subCategoryOverrides,
     clip: tryGetClipData(savedView.savedViewData.itwin3dView.clipVectors),
-    perModelCategoryVisibility: getExtensionValue<PerModelCategoryData[]>(savedView.extensions, "perModelCategoryVisibilityProps") ?? [],
+    perModelCategoryVisibility: getExtensionValue<PerModelCategoryExtension>(savedView.extensions, "PerModelCategoryVisibility")?.perModelCategoryVisibilityProps ?? [],
     hiddenCategories: getListFromListOrCompressedId64Set(savedView.savedViewData.itwin3dView.categories?.disabled),
     hiddenModels: getListFromListOrCompressedId64Set(savedView.savedViewData.itwin3dView.models?.disabled),
     viewMode,

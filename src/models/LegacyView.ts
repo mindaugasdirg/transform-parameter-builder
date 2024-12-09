@@ -39,6 +39,10 @@ export interface PlaneProps {
   clips?: UnionOfPlaneClipSets;
 }
 
+export interface PerModelCategoryExtension {
+  perModelCategoryVisibilityProps: PerModelCategoryData[];
+}
+
 export interface PerModelCategoryData {
   modelId: Id64String;
   categoryId: Id64String;
