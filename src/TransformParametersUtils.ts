@@ -16,8 +16,8 @@ import { EXTENSION_NAMES } from "./models/Extension";
 
 export function parseSavedView(savedView: SavedView, viewMode: ViewModes): TransformParameters {
   return {
-    categories: getListFromListOrCompressedId64Set(savedView.savedViewData.itwin3dView.categories?.enabled),
-    models: getListFromListOrCompressedId64Set(savedView.savedViewData.itwin3dView.models?.enabled),
+    categories: getListFromListOrCompressedId64Set(savedView.savedViewData.itwin3dView.categories?.enabled) ?? [],
+    models: getListFromListOrCompressedId64Set(savedView.savedViewData.itwin3dView.models?.enabled) ?? [],
     neverDrawn: getNeverDrawnSavedView(savedView),
     alwaysDrawn: getAlwaysDrawnSavedView(savedView),
     isAlwaysDrawnExclusive: getIsAlwaysDrawnExclusive(savedView),
@@ -32,8 +32,8 @@ export function parseSavedView(savedView: SavedView, viewMode: ViewModes): Trans
 
 export function parseLegacySavedView(legacyViewDefinition: LegacyView, viewMode: ViewModes): TransformParameters {
   return {
-    categories: getListFromListOrCompressedId64Set(legacyViewDefinition.categorySelectorProps.categories),
-    models: getListFromListOrCompressedId64Set(legacyViewDefinition.modelSelectorProps?.models),
+    categories: getListFromListOrCompressedId64Set(legacyViewDefinition.categorySelectorProps.categories) ?? [],
+    models: getListFromListOrCompressedId64Set(legacyViewDefinition.modelSelectorProps?.models) ?? [],
     neverDrawn: legacyViewDefinition.emphasizeElementsProps?.neverDrawn,
     alwaysDrawn: legacyViewDefinition.emphasizeElementsProps?.alwaysDrawn,
     isAlwaysDrawnExclusive: legacyViewDefinition.emphasizeElementsProps?.isAlwaysDrawnExclusive,
@@ -48,7 +48,7 @@ export function parseLegacySavedView(legacyViewDefinition: LegacyView, viewMode:
 
 function getListFromListOrCompressedId64Set(ids?: string | Id64Array) {
   if (ids === undefined) {
-    return [];
+    return undefined;
   }
 
   if (typeof ids === "string") {
