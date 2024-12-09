@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from "fs";
-import { parseLegacySavedView, parseTransformParametersToJson } from "./TransformParametersUtils";
+import { parseSavedView, parseTransformParametersToJson } from "./TransformParametersUtils";
 import { ViewModes } from "./models/FilterByViewDefinition";
 import { SavedView } from "./models/SavedView";
 import path from "path";
@@ -12,7 +12,7 @@ function run(): void {
 
   const savedViewJSON = readFileSync(path.join(__dirname, "../", savedViewFileName), "utf8");
   const savedView: SavedView = JSON.parse(savedViewJSON).savedView;
-  const transformParameters = parseLegacySavedView(savedView.savedViewData.legacyView, viewMode);
+  const transformParameters = parseSavedView(savedView, viewMode);
 
   const transformParametersJSON = parseTransformParametersToJson(transformParameters, escapeFlag);
 
